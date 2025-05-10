@@ -1,1 +1,188 @@
+	<?php
+    $products = [
+        1 => ["Молоко пастеризоване", 12],
+        2 => ["Хліб чорний", 9],
+        3 => ["Сир білий", 21],
+        4 => ["Сметана 20%", 25],
+        5 => ["Кефір 1%", 19],
+        6 => ["Вода газована", 18],
+        7 => ["Печиво \"Весна\"", 14],
+    ];
 
+    $profile = [];
+    $cart = [];
+
+    function input($message)
+    {
+        echo $message;
+        return trim(fgets(STDIN));
+    }
+
+    function mainMenu()
+    {
+        echo "################################\n";
+        echo "# ПРОДОВОЛЬЧИЙ МАГАЗИН \"ВЕСНА\" #\n";
+        echo "################################\n";
+        echo "1 Вибрати товар\n";
+        echo "2 Отримати підсумковий рахунок\n";
+        echo "3 Налаштувати свій профіль\n";
+        echo "0 Вийти з програми\n";
+    }
+
+    function margin($text, $length)
+    {
+        $chars = iconv_strlen($text, 'UTF-8');
+        $margin = max(0, $length - $chars);
+        return $text . str_repeat(" ", $margin);
+    }
+
+    function products($products)
+    {
+        echo "№  " . str_pad("НАЗВА", 26) . " ЦІНА\n";
+        foreach($products as $i => $product)
+        {
+            echo "$i  " . margin($product[0], 20) . "  $product[1]\n";
+        }
+        echo "   -----------\n";
+        echo "0  ПОВЕРНУТИСЯ\n";
+    }
+
+    function choose(&$products, &$cart)
+    {
+        while(true)
+        {
+            products($products);
+            $choice = input("Виберіть товар: ");
+            if ($choice == "0")
+            break;
+            if (!isset($products[(int)$choice]))
+            {
+                echo "ПОМИЛКА! Ви вказали неправильний номер товару\n";
+                continue;
+            }
+            $productName = $products[(int)$choice][0];
+            echo "Вибрано: $productName\n";
+            $amount = (int)input("Введіть кількість штук: ");
+            if($amount === 0)
+            {
+                if(empty($cart))
+                {
+                    cart($products, $cart);
+                }
+                else
+                {
+                    unset($cart[(int)$choice]);
+                    echo "ВИДАЛЯЮ З КОШИКА\n";
+                    cart($products, $cart);
+                }
+            }
+            elseif($amount < 100 && $amount > 0)
+            {
+                $cart[(int)$choice]=$amount;
+                cart($products, $cart);
+            }
+            else
+            {
+                echo "ПОМИЛКА! Ви вказали неправильну кількість товару\n";
+                cart($products, $cart);
+            }
+        }
+    }
+
+    function cart($products, $cart)
+    {
+        if (empty($cart))
+        {
+            echo "КОШИК ПОРОЖНІЙ\n";
+            return;
+        }
+        echo "У КОШИКУ:\n";
+        echo str_pad("НАЗВА", 26) . " КІЛЬКІСТЬ\n";
+        foreach($cart as $i => $amount)
+        {
+            echo margin($products[$i][0], 20) . "  $amount\n";
+        }
+        echo "\n";
+    }
+
+    function bill($products, $cart)
+    {
+        if(empty($cart))
+        {
+            cart($products, $cart);
+            return;
+        }
+        echo "№  НАЗВА          ЦІНА  КІЛЬКІСТЬ  ВАРТІСТЬ\n";
+        $total_price = 0;
+        foreach ($cart as $i => $amount)
+        {
+            $name = $products[$i][0];
+            $price = $products[$i][1];
+            $cost = $price*$amount;
+            echo "$i  " . margin($name, 21) . margin($price, 6) . margin($amount, 10) . " $cost\n";
+            $total_price +=$cost;
+        }
+        echo "РАЗОМ ДО СПЛАТИ: $total_price\n";
+        echo "\n";
+    }
+
+    function profile()
+    {
+        while(true)
+        {
+            $name = input("Ваше ім'я: ");
+            if (preg_match('/\p{L}/u', $name))
+            {
+                break;
+            }
+            else
+            {
+            echo "ПОМИЛКА! Ім'я може містити лише літери, апостроф ', дефіс -, пробіл\n";
+            }
+        }
+        while(true)
+        {
+            $age = (int)input("Ваш вік: ");
+            if(!is_numeric($age))
+            {
+                echo "ПОМИЛКА! Вік користувача потрібно вказати числом\n";
+            }
+            elseif ($age <= 7 || $age >= 150)
+            {
+            echo "ПОМИЛКА! Користувач повинен мати вік від 7 та до 150 років\n";
+            }
+            else
+            {
+                break;
+            }
+        }
+        $profile = [$name, $age];
+        echo "\n";
+        echo "Ваше ім'я: $profile[0]\n";
+        echo "Ваш вік: $profile[1]\n";
+        echo "\n";
+    }
+
+    while (true)
+    {
+        mainMenu();
+        $output = input("Введіть команду: ");
+
+        switch($output)
+        {
+            case "1":
+                choose($products, $cart);
+                break;
+            case "2":
+                bill($products, $cart);
+                break;
+            case "3":
+                profile();
+                break;
+            case "0":
+                exit;
+            default:
+                echo "ПОМИЛКА! Введіть правильну команду\n";
+        }
+    }
+?>
