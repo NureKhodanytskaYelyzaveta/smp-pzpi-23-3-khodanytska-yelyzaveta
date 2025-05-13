@@ -1,1 +1,290 @@
+Міністерство освіти і науки України 
+Харківський національний університет радіоелектроніки
 
+
+Катедра програмної інженерії
+
+Звіт
+з лабораторної роботи №1
+з дисципліни «Скриптові мови програмування»
+
+
+
+Виконала:                                                                 Перевірив:
+ст. гр. ПЗПІ-23-3						викладач катедри ПІ
+Ходаницька Єлизавета 					Сокорчук Ігор Петрович
+
+
+
+
+
+
+
+Харків - 2025
+	1 ІСТОРІЯ ЗМІН
+№
+Дата
+Версія звіту
+Опис змін та виправлень
+1
+30.04.2025
+0.1
+Зроблено звіт
+2
+10.05.2025
+0.2
+Перероблено звіт згідно вимог
+
+
+	2 ЗАВДАННЯ
+Ознайомитися з основними командами Bash для роботи з файлами та текстовими даними. Навчитися використовувати команди select, ls, awk, sort, uniq, tee, cat, sed, iconv тощо. Розробити Bash-скрипт для перетворення CSV файла розкладу занять у придатний для імпорту в Google Календар CSV формат.
+
+	3 ОПИС ВИКОНАНОЇ РОБОТИ
+	3.1 Створення скрипта
+Спочатку було створено скрипт за допомоги команди touch (див. рис. Б.1).
+
+	3.2 Додавання права на виконання
+	Далі було додано за допомогою команди chmod і +x право для виконання скрипта (див. рис. Б.2).
+
+	3.3 Редагування скрипта
+	За допомогою команди mcedit перейшла до безпосереднього написання коду і подальшого його редагування (див. рис. Б.3).
+
+	3.4 Скрипт і робота скрипта
+Після запуску програма перевіряє, чи були вказані додаткові параметри. Якщо так — виконує відповідні дії: наприклад, показує використання або версію програми. Якщо вказано параметр -q або --quiet, то під час роботи не виводитиметься інформація в командний рядок. Якщо користувач передає аргументи у вигляді назви академічної групи та CSV-файлу, програма їх зчитує. Якщо ні, програма запропонує обрати групу або файл з розкладу вручну зі списку файлів, які знайде у поточній папці.
+Далі програма відкриває CSV-файл, конвертує його з кодування Windows-1251 у UTF-8, та видаляє зайві символи переходу. Це потрібно для правильної обробки тексту.
+Потім програма шукає вказану академічну групу у файлі. Якщо така група є, вона буде використана як фільтр для вибору лише тих занять, які стосуються цієї групи. Якщо в розкладі немає записів з такою групою, програма повідомить про помилку і завершиться.
+Після цього йде головна частина обробки файлу. Зчитуються рядки CSV-файлу, з кожного з них програма витягує предмет, дату початку, час початку, дату закінчення, час закінчення та опис. Вона також очищає текст від зайвих символів, щоб краще аналізувати інформацію.
+Програма перевіряє, чи це лабораторне заняття, чи інше. Для лабораторних занять ведеться окремий підрахунок блоків, щоб правильно нумерувати їх. Для інших занять теж ведеться лічильник, щоб показати, яке це за рахунком заняття, і потім цей номер додається до назви предмета у форматі.
+Далі програма перетворює час з 24-годинного формату в американський з AM/PM, який вимагає Google Календар.
+У результаті буде сформовано новий CSV-файл, де кожен рядок містить:
+Предмет з номером пари;
+Дату і час початку;
+Дату і час закінчення;
+Опис.
+Цей файл зберігається у поточній папці з назвою, яка починається на Google_.
+Якщо режим не тихий, то інформація також виводиться в консоль. Після завершення програма повідомляє, що файл був успішно створений, і завершується.
+
+	4 ВИСНОВКИ
+	Під час виконання лабораторної роботи ознайомилися з основними командами Bash для роботи з файлами та текстовими даними, навчилися використовувати команди select, ls, awk, sort, uniq, tee, cat, sed, iconv, розробили Bash-скрипт для перетворення CSV файла розкладу занять у придатний для імпорту в Google Календар CSV формат.
+
+	ДОДАТОК А 
+Відеозапис
+Відеозапис презентації результатів лабораторної роботи: https://youtu.be/zHbPylRCxGw
+
+Хронологічний опис відеозапису:
+00:20 — Пояснення змінних
+00:33 — Пояснення функцій для виклику скрипта (використання, версія, тихий режим тощо)
+01:33 — Пояснення перевірки на вхідний файл
+02:05 — Пояснення конвертації у юнікод
+02:15 — Пояснення перевірки на групи
+02:51 — Пояснення створення заголовку і зчитування рядків з вхідного файлу
+03:36 — Пояснення блоку лабораторних й інших предметів, додавання відповідного номеру до заняття
+05:45 — Пояснення переведення часу в американський формат am/pm
+06:29 — Виведення перетворених даних у новий файл для гугл календаря чи у командний рядок, якщо не встановлений тихий режим
+07:00 — Демонстрація роботи програми
+
+ДОДАТОК Б 
+Графічні матеріали
+
+Рисунок Б.1 — Створення скрипта
+
+
+Рисунок Б.2 — Додавання права на виконання
+
+
+Рисунок Б.3 — Редагування скрипта
+
+
+Рисунок Б.4 — Виклик скрипта
+
+
+Рисунок Б.5 — Результат виконання скрипта
+
+ДОДАТОК В 
+Програмний код 
+В1 Код для перетворення CSV файла розкладу занять у придатний для імпорту в Google Календар CSV формат.
+
+GitHub репозиторій:
+https://github.com/NureKhodanytskaYelyzaveta/smp-pzpi-23-3-khodanytska-yelyzaveta/blob/main/Lab1/smp-pzpi-23-3-khodanytska-yelyzaveta-lab1/smp-pzpi-23-3-khodanytska-yelyzaveta-lab1-code
+
+  1 #!/bin/bash
+  2
+  3 VERSION="1.0"
+  4 SCRIPT_NAME=$(basename "$0")
+  5 OUTPUT_PREFIX="Google_"
+  6 QUIET=0
+  7
+  8 show_help() {
+  9     echo "Використання: $SCRIPT_NAME [--help | --version] | [-q|--quiet]"
+ 10 }
+ 11
+ 12 show_version() {
+ 13     echo "$SCRIPT_NAME версія $VERSION"
+ 14 }
+ 15
+ 16 while [[ $# -gt 0 ]]; do
+ 17     case "$1" in
+ 18         --help) show_help; exit 0 ;;
+ 19         --version) show_version; exit 0 ;;
+ 20         -q|--quiet) QUIET=1; shift ;;
+ 21         -*) echo "Невідомий параметр: $1" >&2; exit 1 ;;
+ 22         *)
+ 23             if [[ -z "$GROUP" ]]; then
+ 24                 GROUP="$1"
+ 25             elif [[ -z "$INPUT_FILE" ]]; then
+ 26                 INPUT_FILE="$1"
+ 27             else
+ 28                 echo "Забагато параметрів." >&2
+ 29                 exit 1
+ 30             fi
+ 31             shift
+ 32             ;;
+ 33     esac
+ 34 done
+ 35
+ 36 if [[ -z "$INPUT_FILE" ]]; then
+ 37     echo "Виберіть CSV-файл:"
+ 38     files=( $(ls TimeTable_??_??_20??.csv 2>/dev/null | sort) )
+ 39     if [[ ${#files[@]} -eq 0 ]]; then
+ 40         echo "Не знайдено TimeTable_??_??_20??.csv у поточній директорії." >&2
+ 41         exit 1
+ 42     fi
+ 43     select f in "${files[@]}"; do
+ 44         if [[ -n "$f" ]]; then
+ 45             INPUT_FILE="$f"
+ 46             break
+ 47         else
+ 48             echo "Некоректний вибір."
+ 49         fi
+ 50     done
+ 51 fi
+ 52
+ 53 if [[ ! -f "$INPUT_FILE" ]]; then
+ 54     echo "Файл '$INPUT_FILE' не знайдено." >&2
+ 55     exit 1
+ 56 fi
+ 57
+ 58 TMP_FILE=$(mktemp)
+ 59 iconv -f WINDOWS-1251 -t UTF-8 "$INPUT_FILE" | tr '\r' '\n' > "$TMP_FILE"
+ 60
+ 61 if [[ -z "$GROUP" ]]; then
+ 62     echo "Виберіть академічну групу:"
+ 63     groups=( $(grep -oE '[А-Яа-яA-Za-zІіЇїЄєҐґ]{2,10}-[0-9]{2}-[0-9]' "$TMP_FILE" | sort -u) )
+ 64     if [[ ${#groups[@]} -eq 0 ]]; then
+ 65         echo "Не знайдено жодної групи у файлі." >&2
+ 66         rm -f "$TMP_FILE"
+ 67         exit 1
+ 68     fi
+ 69     select g in "${groups[@]}"; do
+ 70         if [[ -n "$g" ]]; then
+ 71             GROUP="$g"
+ 72             break
+ 73         else
+ 74             echo "Некоректний вибір."
+ 75         fi
+ 76     done
+ 77 fi
+ 78
+ 79 BASE_NAME=$(basename "$INPUT_FILE" .csv)
+ 80 OUTPUT_FILE="${OUTPUT_PREFIX}${BASE_NAME}.csv"
+ 81
+ 82 declare -A lesson_counters
+ 83 declare -A lab_block_counter
+ 84 declare -A lab_dates_seen
+ 85
+ 86 echo '"Subject","Start Date","Start Time","End Date","End Time","Description"' > "$OUTPUT_FILE"
+ 87 {
+ 88     read -r header
+ 89     while IFS= read -r line; do
+ 90         fields=()
+ 91         tmp_line="$line"
+ 92         while [[ $tmp_line =~ ^\"([^\"]*)\"(,?)(.*) ]]; do
+ 93             fields+=("${BASH_REMATCH[1]}")
+ 94             tmp_line=${BASH_REMATCH[3]}
+ 95         done
+ 96
+ 97         subject="${fields[0]}"
+ 98         start_date="${fields[1]}"
+ 99         start_time="${fields[2]}"
+100         end_date="${fields[3]}"
+101         end_time="${fields[4]}"
+102         description="${fields[11]}"
+103
+104         clean_subject=$(echo "$subject" | tr -d '()*"' | sed 's/--/-/g')
+105         clean_description=$(echo "$description" | tr -d '()*"' | sed 's/--/-/g')
+106
+107         if [[ "$clean_subject" != *"$GROUP"* && "$clean_description" != *"$GROUP"* ]]; then
+108             continue
+109         fi
+110
+111         subject=$(echo "$subject" | sed -E 's/^[A-Za-zА-Яа-яІіЇїЄєҐґ0-9]{2,10}-[0-9]{2}-[0-9] - //')
+112
+113         if echo "$subject" | grep -q '\<Лб\>' ; then
+114             lesson_type="Лб"
+115         else
+116             lesson_type="Інше"
+117         fi
+118
+119         if [[ "$lesson_type" == "Лб" ]]; then
+120             lab_subject_key=$(echo "$subject" | tr -d '()*"' | sed 's/--/-/g' | tr -s ' ')
+121             date_key="${lab_subject_key}_${start_date}"
+122
+123             if [[ -z "${lab_dates_seen[$date_key]}" ]]; then
+124                 lab_block_counter[$lab_subject_key]=${lab_block_counter[$lab_subject_key]:-0}
+125                 lab_block_counter[$lab_subject_key]=$((lab_block_counter[$lab_subject_key] + 1))
+126                 lab_dates_seen[$date_key]=${lab_block_counter[$lab_subject_key]}
+127             fi
+128
+129             block_number=${lab_dates_seen[$date_key]}
+130         else
+131             subject_key=$(echo "${subject}_${lesson_type}" | tr -d '()*"' | sed 's/--/-/g' | tr -s ' ')
+132             lesson_counters[$subject_key]=${lesson_counters[$subject_key]:-0}
+133             lesson_counters[$subject_key]=$((lesson_counters[$subject_key] + 1))
+134             block_number=${lesson_counters[$subject_key]}
+135         fi
+136
+137         subject="${subject}; №$block_number"
+138
+139         start_hour_raw=${start_time%%:*}
+140         start_minute_second=${start_time#*:}
+141         start_minute=${start_minute_second%%:*}
+142         start_hour=$((10#$start_hour_raw))
+143         am_pm="AM"
+144         if (( start_hour >= 12 )); then
+145             am_pm="PM"
+146             if (( start_hour > 12 )); then
+147                 start_hour=$((start_hour - 12))
+148             fi
+149         elif (( start_hour == 0 )); then
+150             start_hour=12
+151         fi
+152         start_time_12h=$(printf "%d:%02d %s" "$start_hour" "$start_minute" "$am_pm")
+153
+154         end_hour_raw=${end_time%%:*}
+155         end_minute_second=${end_time#*:}
+156         end_minute=${end_minute_second%%:*}
+157         end_hour=$((10#$end_hour_raw))
+158         am_pm_end="AM"
+159         if (( end_hour >= 12 )); then
+160             am_pm_end="PM"
+161             if (( end_hour > 12 )); then
+162                 end_hour=$((end_hour - 12))
+163             fi
+164         elif (( end_hour == 0 )); then
+165             end_hour=12
+166         fi
+167         end_time_12h=$(printf "%d:%02d %s" "$end_hour" "$end_minute" "$am_pm_end")
+168
+169         printf '"%s","%s","%s","%s","%s","%s"\n' \
+170             "$subject" "$start_date" "$start_time_12h" "$end_date" "$end_time_12h" "$description" >> "$OUTPUT_FILE"
+171
+172         if [[ $QUIET -eq 0 ]]; then
+173             printf '"%s","%s","%s","%s","%s","%s"\n' \
+174                 "$subject" "$start_date" "$start_time_12h" "$end_date" "$end_time_12h" "$description"
+175         fi
+176     done
+177 } < "$TMP_FILE"
+178
+179 rm -f "$TMP_FILE"
+180 echo "Розклад для Google календаря: $OUTPUT_FILE"
+181 exit 0
