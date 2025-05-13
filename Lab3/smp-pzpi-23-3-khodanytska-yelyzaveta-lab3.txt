@@ -1,1 +1,312 @@
+Міністерство освіти і науки України 
+Харківський національний університет радіоелектроніки
 
+
+Катедра програмної інженерії
+
+Звіт
+з лабораторної роботи №3
+з дисципліни «Скриптові мови програмування»
+
+
+
+Виконала:                                                                 Перевірив:
+ст. гр. ПЗПІ-23-3						викладач катедри ПІ
+Ходаницька Єлизавета 					Сокорчук Ігор Петрович
+
+
+
+
+
+
+
+Харків - 2025
+	1 ІСТОРІЯ ЗМІН
+№
+Дата
+Версія звіту
+Опис змін та виправлень
+1
+28.04.2025
+0.1
+Зроблено звіт
+2
+12.05.2025
+0.2
+Перероблено звіт згідно вимог
+
+
+	2 ЗАВДАННЯ
+	Отримати базові знання з розробки сайтів.
+
+	3 ОПИС ВИКОНАНОЇ РОБОТИ
+	3.1 Скрипт і робота скрипта
+Скрипт реалізує простий веб-додаток, який використовує сесії для тимчасового зберігання кошика під час сеансу. У додатку є масив товарів, кожен з яких має унікальний ідентифікатор, назву та ціну. Перш за все при відкритті сторінки запускається сесія.
+Для кожної сторінки додатка визначається змінною $page, яка передається через GET-запити. Якщо значення $page дорівнює “products”, відображається список товарів із формами для їх додавання до кошика (див. рис. Б.1). Якщо $page дорівнює “cart”, показується кошик користувача, де можна побачити всі додані товари, їх кількість і підсумкову суму покупок (див. рис. Б.2-Б.3). Кожен товар у кошику можна видалити, натиснувши на кнопку "Видалити".
+Також реалізовано додавання товару в кошик та видалення товару з кошика. Коли користувач натискає на кнопку “Купити” (див. рис. Б.4), відправляється POST-запит із обраним товаром та кількістю. Кількість товару обмежена від 1 до 100 одиниць (див. рис. Б.5-Б-6). Якщо товар уже є в кошику, кількість оновлюється, інакше товар додається з початковою кількістю. Якщо користувач хоче видалити товар, він може це зробити, натиснувши кнопку "Видалити" на сторінці кошика (див. рис. Б.7). У результаті товар видаляється зі сесії.
+Окрім цього, після виконання будь-якої операції (додавання, видалення чи придбання товару) користувач отримує повідомлення про успішне виконання дії.
+
+	4 ВИСНОВКИ
+	Під час виконання лабораторної роботи отримали базові знання з розробки сайтів.
+
+	ДОДАТОК А 
+Відеозапис
+Відеозапис презентації результатів лабораторної роботи: https://youtu.be/t6ptqSdchQY
+
+Хронологічний опис відеозапису:
+00:13 — Пояснення php частини з сесією й обробкою дій
+01:52 — Пояснення HTML частини
+02:06 — Пояснення шапки сайту
+02:23 — Пояснення сторінки продуктів з додаванням до кошику
+02:47 — Пояснення сторінки кошику з видаленням з кошику
+03:38 — Пояснення підвалу сайту
+03:53 — Демонстрація роботи програми
+
+ДОДАТОК Б 
+Графічні матеріали
+
+Рисунок Б.1 — Головна сторінка
+
+
+Рисунок Б.2-Б.3 — Кошик
+ Рисунок Б.4 — Додавання
+
+
+
+Рисунок Б.5-Б.6 — Обмеження
+
+
+Рисунок Б.7 — Видалення
+ДОДАТОК В 
+Програмний код
+В1 Код «Продовольчий магазин "Весна"».
+
+GitHub репозиторій:
+https://github.com/NureKhodanytskaYelyzaveta/smp-pzpi-23-3-khodanytska-yelyzaveta/blob/main/Lab3/smp-pzpi-23-3-khodanytska-yelyzaveta-lab3/smp-pzpi-23-3-khodanytska-yelyzaveta-lab3-code
+
+  1 <?php
+  2 session_start();
+  3 
+  4 $products = [
+  5     1 => ['name' => 'Молоко пастеризоване', 'price' => 12],
+  6     2 => ['name' => 'Хліб чорний', 'price' => 9],
+  7      3 => ['name' => 'Сир білий', 'price' => 21],
+  8     4 => ['name' => 'Сметана 20%', 'price' => 25],
+  9     5 => ['name' => 'Кефір 1%', 'price' => 19],
+ 10     6 => ['name' => 'Вода газована', 'price' => 18],
+ 11     7 => ['name' => 'Печиво "Весна"', 'price' => 14],
+ 12 ];
+ 13
+ 14 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['product_id'])) {
+ 15     $id = (int)$_POST['product_id'];
+ 16     $action = $_POST['action'];
+ 17
+ 18     if (!isset($_SESSION['cart'])) {
+ 19         $_SESSION['cart'] = [];
+ 20     }
+ 21 
+ 22     if ($action === 'add') {
+ 23         $quantity = max(1, min(100, (int)$_POST['quantity']));
+ 24         if (isset($_SESSION['cart'][$id])) {
+ 25             $_SESSION['cart'][$id] = min($_SESSION['cart'][$id] + $quantity, 100);
+ 26         } else {
+ 27             $_SESSION['cart'][$id] = $quantity;
+ 28         }
+ 29         $message = "Товар додано до кошика!";
+ 30     }
+ 31 
+ 32     if ($action === 'remove' && isset($_SESSION['cart'][$id])) {
+ 33         unset($_SESSION['cart'][$id]);
+ 34         $message = "Товар видалено з кошика!";
+ 35     }
+ 36 }
+ 37
+ 38 $page = isset($_GET['page']) ? $_GET['page'] : 'products';
+ 39 ?>
+ 40 <!DOCTYPE html>
+ 41 <html lang="uk">
+ 42 <head>
+ 43     <meta charset="UTF-8">
+ 44     <title>Продовольчий магазин "Весна"</title>
+ 45     <style>
+ 46         * { box-sizing: border-box; }
+ 47 
+ 48         body {
+ 49             margin: 0;
+ 50             font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+ 51             background: #f2f4f8;
+ 52             color: #333;
+ 53         }
+ 54
+ 55         header, footer {
+ 56             background-color: #005f99;
+ 57             color: white;
+ 58             height: 60px;
+ 59             padding: 15px 30px;
+ 60             display: flex;
+ 61             justify-content: center;
+ 62             align-items: center;
+ 63         }
+ 64
+ 65         nav a {
+ 66             color: white;
+ 67             margin: 0 15px;
+ 68             text-decoration: none;
+ 69             font-weight: bold;
+ 70         }
+ 71
+ 72         main {
+ 73             padding: 30px;
+ 74             max-width: 900px;
+ 75             margin: auto;
+ 76             background-color: white;
+ 77             border-radius: 12px;
+ 78             box-shadow: 0 0 15px rgba(0,0,0,0.05);
+ 79             padding-top: 20px;
+ 80             padding-bottom: 80px;
+ 81         }
+ 82
+ 83         h2 {
+ 84             margin-bottom: 30px;
+ 85             color: #005f99;
+ 86             border-bottom: 2px solid #005f99;
+ 87             padding-bottom: 10px;
+ 88         }
+ 89
+ 90         .product {
+ 91             display: flex;
+ 92             align-items: center;
+ 93             justify-content: space-between;
+ 94             padding: 15px 10px;
+ 95             border-bottom: 1px solid #eee;
+ 96         }
+ 97
+ 98         .product h3 {
+ 99             margin: 0;
+100             flex: 1;
+101         }
+102
+103         .product p {
+104             margin: 0 20px;
+105             color: #555;
+106         }
+107
+108         .product form {
+109             display: flex;
+110             align-items: center;
+111             gap: 10px;
+112         }
+113
+114         input[type="number"] {
+115             width: 60px;
+116             padding: 5px;
+117             border-radius: 4px;
+118             border: 1px solid #ccc;
+119         }
+120
+121         button {
+122             background-color: #005f99;
+123             color: white;
+124             border: none;
+125             padding: 8px 16px;
+126             border-radius: 6px;
+127             cursor: pointer;
+128             transition: background-color 0.2s ease-in-out;
+129         }
+130
+131         button:hover {
+132             background-color: #005f99;
+133         }
+134
+135         .message {
+136             text-align: center;
+137             color: green;
+138             font-weight: bold;
+139             margin-bottom: 20px;
+140         }
+141
+142         .go-back {
+143             color: black;
+144             font-weight: bold;
+145             text-decoration: none;
+146             transition: color 0.2s ease-in-out;
+147         }
+148
+149         .go-back:hover {
+150             color: #005f99;
+151             text-decoration: none;
+152         }
+153
+154     </style>
+155 </head>
+156 <body>
+157
+158 <header>
+159     <nav>
+160         <a>Р“РѕР»РѕРІРЅР°</a> |
+161         <a href="lab3.php?page=products">Товари</a> |
+162         <a href="lab3.php?page=cart">Кошик</a>
+163     </nav>
+164 </header>
+165
+166 <main>
+167
+168 <?php if (!empty($message)): ?>
+169     <p class="message"><?php echo htmlspecialchars($message); ?></p>
+170 <?php endif; ?>
+171
+172 <?php if ($page === 'products'): ?>
+173     <h2>Товари</h2>
+174     <?php foreach ($products as $id => $product): ?>
+175         <div class="product">
+176             <h3><?php echo htmlspecialchars($product['name']); ?></h3>
+177             <p>Ціна: <?php echo $product['price']; ?> РіСЂРЅ</p>
+178             <form method="post" action="lab3.php?page=products">
+179                 <input type="hidden" name="product_id" value="<?php echo $id; ?>">
+180                 <input type="hidden" name="action" value="add">
+181                 Кількість: <input type="number" name="quantity" value="1" min="1" max="100">
+182                 <button type="submit">Купити</button>
+183             </form>
+184         </div>
+185     <?php endforeach; ?>
+186
+187     <?php elseif ($page === 'cart'): ?>
+188     <h2>Кошик</h2>
+189     <?php if (empty($_SESSION['cart'])): ?>
+190         <p>Ваш кошик порожній. <a href="lab3.php?page=products" class="go-back">Перейти до покупок</a></p>
+191     <?php else: ?>
+192         <?php
+193         $total = 0;
+194         foreach ($_SESSION['cart'] as $id => $quantity):
+195             if (!isset($products[$id])) continue;
+196             $product = $products[$id];
+197             $sum = $product['price'] * $quantity;
+198             $total += $sum;
+199         ?>
+200             <div class="product">
+201                 <h3><?php echo htmlspecialchars($product['name']); ?></h3>
+202                 <p>Кількість: <?php echo $quantity; ?>  шт. Ціна: <?php echo $sum; ?> грн</p>
+203                 <form method="post" action="lab3.php?page=cart">
+204                     <input type="hidden" name="product_id" value="<?php echo $id; ?>">
+205                     <input type="hidden" name="action" value="remove">
+206                     <button type="submit">Видалити</button>
+207                 </form>
+208             </div>
+209         <?php endforeach; ?>
+210         <p style="text-align:right; font-weight:bold; margin-top: 20px;">Всього: <?php echo $total; ?> грн</p>
+211     <?php endif; ?>
+212 <?php endif; ?>
+213
+214
+215 </main>
+216
+217 <footer>
+218     <nav>
+219         <a>Р“Головна</a> |
+220         <a href="lab3.php?page=products">Товари</a> |
+221         <a href="lab3.php?page=cart">Кошик</a>
+222     </nav>
+223 </footer>
+224
+225 </body>
+226 </html>
