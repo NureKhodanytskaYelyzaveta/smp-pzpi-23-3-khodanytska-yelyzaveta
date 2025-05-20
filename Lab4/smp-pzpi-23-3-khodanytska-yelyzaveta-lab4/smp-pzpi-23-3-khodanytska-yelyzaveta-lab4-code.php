@@ -139,38 +139,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['product_id']) && isset($_SESSION['user'])) {
-    $id = (int)$_POST['product_id'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && isset($_SESSION['user'])) {
     $action = $_POST['action'];
 
     if (!isset($_SESSION['cart'])) {
         $_SESSION['cart'] = [];
     }
 
-    if ($action === 'add') {
-        $quantity = max(1, min(100, (int)$_POST['quantity']));
-        if (isset($_SESSION['cart'][$id])) {
-            $_SESSION['cart'][$id] = min($_SESSION['cart'][$id] + $quantity, 100);
-        } else {
-            $_SESSION['cart'][$id] = $quantity;
-        }
-        $message = "Товар додано до кошика!";
-    }
+    if (isset($_POST['product_id'])) {
+        $id = (int)$_POST['product_id'];
 
-    if ($action === 'remove' && isset($_SESSION['cart'][$id])) {
-        unset($_SESSION['cart'][$id]);
-        $message = "Товар видалено з кошика!";
+        if ($action === 'add') {
+            $quantity = max(1, min(100, (int)$_POST['quantity']));
+            if (isset($_SESSION['cart'][$id])) {
+                $_SESSION['cart'][$id] = min($_SESSION['cart'][$id] + $quantity, 100);
+            } else {
+                $_SESSION['cart'][$id] = $quantity;
+            }
+            $_SESSION['message'] = "Товар додано до кошика!";
+        }
+
+        if ($action === 'remove' && isset($_SESSION['cart'][$id])) {
+            unset($_SESSION['cart'][$id]);
+            $_SESSION['message'] = "Товар видалено з кошика!";
+        }
     }
 
     if ($action === 'checkout') {
         $_SESSION['cart'] = [];
         $_SESSION['message'] = "Дякуємо за покупку!";
-        header("Location: lab3.php?page=cart");
+        header("Location: lab4.php?page=cart");
         exit;
     }
 }
 
 $page = isset($_GET['page']) ? $_GET['page'] : (isset($_SESSION['user']) ? 'products' : 'home');
+$message = $_SESSION['message'] ?? null;
+$form_error = $_SESSION['form_error'] ?? null;
+$form_data = $_SESSION['form_data'] ?? null;
+unset($_SESSION['message'], $_SESSION['form_error'], $_SESSION['form_data']);
 ?>
 
 <!DOCTYPE html>
