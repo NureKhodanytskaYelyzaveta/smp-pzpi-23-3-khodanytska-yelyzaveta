@@ -54,7 +54,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $message = "Усі поля обов'язкові!";
     } elseif (isset($users[$username]) && password_verify($password, $users[$username])) {
         $_SESSION['user'] = $username;
-        $_SESSION['login_time'] = date('Y-m-d H:i:s');
         header("Location: lab4.php?page=products");
         exit;
     } else {
@@ -161,6 +160,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['pro
     if ($action === 'remove' && isset($_SESSION['cart'][$id])) {
         unset($_SESSION['cart'][$id]);
         $message = "Товар видалено з кошика!";
+    }
+
+    if ($action === 'checkout') {
+        $_SESSION['cart'] = [];
+        $_SESSION['message'] = "Дякуємо за покупку!";
+        header("Location: lab3.php?page=cart");
+        exit;
     }
 }
 
@@ -287,8 +293,8 @@ $page = isset($_GET['page']) ? $_GET['page'] : (isset($_SESSION['user']) ? 'prod
             font-size: 16px;
             color: #34495e;
             font-weight: 500;
-}
-.login-form input {
+        }
+        .login-form input {
             width: 100%;
             padding: 12px;
             font-size: 16px;
@@ -436,9 +442,11 @@ $page = isset($_GET['page']) ? $_GET['page'] : (isset($_SESSION['user']) ? 'prod
 <main>
 
 <?php if (!empty($message)): ?>
-    <p class="<?php echo strpos($message, 'успішно') !== false ? 'message' : 'error'; ?>">
-        <?php echo htmlspecialchars($message); ?>
-    </p>
+    <p class="message" style="color:green;"><?php echo htmlspecialchars($message); ?></p>
+<?php endif; ?>
+
+<?php if (!empty($form_error)): ?>
+    <p class="message" style="color:red;"><?php echo htmlspecialchars($form_error); ?></p>
 <?php endif; ?>
 
 <?php if ($page === 'home'): ?>
@@ -504,6 +512,13 @@ $page = isset($_GET['page']) ? $_GET['page'] : (isset($_SESSION['user']) ? 'prod
             </div>
         <?php endforeach; ?>
         <p style="text-align:right; font-weight:bold; margin-top: 20px;">Всього: <?php echo $total; ?> грн</p>
+        <div style="text-align: right; margin-top: 30px;">
+            <button onclick="location.href='lab3.php?page=products'" style="margin-left: 10px;">Повернутися назад</button>
+            <form method="post" action="lab3.php?page=cart" style="display: inline;">
+                <input type="hidden" name="action" value="checkout">
+                <button type="submit">Придбати</button>
+            </form>
+        </div>
     <?php endif; ?>
 
 <?php elseif ($page === 'profile' && isset($_SESSION['user'])): ?>
