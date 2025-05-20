@@ -171,7 +171,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['pro
 }
 
 $page = isset($_GET['page']) ? $_GET['page'] : (isset($_SESSION['user']) ? 'products' : 'home');
+$message = $_SESSION['message'] ?? null;
+$form_error = $_SESSION['form_error'] ?? null;
+$form_data = $_SESSION['form_data'] ?? null;
+unset($_SESSION['message'], $_SESSION['form_error'], $_SESSION['form_data']);
 ?>
+
 <!DOCTYPE html>
 <html lang="uk">
 <head>
