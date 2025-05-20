@@ -193,10 +193,8 @@ unset($_SESSION['message'], $_SESSION['form_error'], $_SESSION['form_data']);
 <?php endif; ?>
 
 <?php if ($page === 'home'): ?>
-    <?php if (isset($_SESSION['user'])): ?>
-        <h2>Ласкаво просимо!</h2>
-        <p>Раді знову вас бачити на нашому сайті.</p>
-    <?php endif; ?>
+    <h2>Ласкаво просимо!</h2>
+    <p>Раді знову вас бачити на нашому сайті.</p>
 
 <?php elseif ($page === 'products'): ?>
     <h2>Товари</h2>
