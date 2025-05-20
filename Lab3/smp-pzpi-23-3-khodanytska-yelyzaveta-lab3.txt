@@ -84,7 +84,7 @@
 В1 Код «Продовольчий магазин "Весна"».
 
 GitHub репозиторій:
-https://github.com/NureKhodanytskaYelyzaveta/smp-pzpi-23-3-khodanytska-yelyzaveta/blob/main/Lab3/smp-pzpi-23-3-khodanytska-yelyzaveta-lab3/smp-pzpi-23-3-khodanytska-yelyzaveta-lab3-code
+https://github.com/NureKhodanytskaYelyzaveta/smp-pzpi-23-3-khodanytska-yelyzaveta/tree/main/Lab3/smp-pzpi-23-3-khodanytska-yelyzaveta-lab3
 
 1 <?php
 2 session_start();
