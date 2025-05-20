@@ -70,106 +70,106 @@ unset($_SESSION['message'], $_SESSION['form_error'], $_SESSION['form_data']);
     <meta charset="UTF-8">
     <title>Продовольчий магазин "Весна"</title>
     <style>
-* { 
-    box-sizing: border-box; 
-}
-html, body {
-    height: 100vh;
-    margin: 0;
-    font-family: system-ui, sans-serif;
-    background: #f2f4f8;
-    color: #333;
-    position: relative;
-}
-header, footer {
-    background-color: #005f99;
-    color: white;
-    height: 60px;
-    padding: 15px 30px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-nav a {
-    color: white;
-    margin: 0 15px;
-    text-decoration: none;
-    font-weight: bold;
-}
-main {
-    padding: 30px;
-    max-width: 900px;
-    margin: 0 auto;
-    background-color: white;
-    border-radius: 12px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.05);
-    min-height: calc(100vh - 180px);
-    padding-bottom: 60px;
-    box-sizing: border-box;
-}
-h2 {
-    margin-bottom: 30px;
-    color: #005f99;
-    border-bottom: 2px solid #005f99;
-    padding-bottom: 10px;
-}
-.product {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 15px 10px;
-    border-bottom: 1px solid #eee;
-}
-.product h3 { 
-    margin: 0; 
-    flex: 1; 
-}
-.product p { 
-    margin: 0 20px; 
-    color: #555; 
-}
-.product form {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-input[type="number"] {
-    width: 60px;
-    padding: 5px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-}
-button {
-    background-color: #005f99;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.2s ease-in-out;
-}
-button:hover {
-    background-color: #004d80;
-}
-.message {
-    text-align: center;
-    font-weight: bold;
-    margin-bottom: 20px;
-}
-.go-back {
-    color: black;
-    font-weight: bold;
-    text-decoration: none;
-    transition: color 0.2s ease-in-out;
-}
-.go-back:hover {
-    color: #005f99;
-}
-footer {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-}
+        * { 
+            box-sizing: border-box; 
+        }
+        html, body {
+            height: 100vh;
+            margin: 0;
+            font-family: system-ui, sans-serif;
+            background: #f2f4f8;
+            color: #333;
+            position: relative;
+        }
+        header, footer {
+            background-color: #005f99;
+            color: white;
+            height: 60px;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        nav a {
+            color: white;
+            margin: 0 15px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        main {
+            padding: 30px;
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.05);
+            min-height: calc(100vh - 180px);
+            padding-bottom: 60px;
+            box-sizing: border-box;
+        }
+        h2 {
+            margin-bottom: 30px;
+            color: #005f99;
+            border-bottom: 2px solid #005f99;
+            padding-bottom: 10px;
+        }
+        .product {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .product h3 { 
+            margin: 0; 
+            flex: 1; 
+        }
+        .product p { 
+            margin: 0 20px; 
+            color: #555; 
+        }
+        .product form {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        input[type="number"] {
+            width: 60px;
+            padding: 5px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background-color: #005f99;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+        button:hover {
+            background-color: #004d80;
+        }
+        .message {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .go-back {
+            color: black;
+            font-weight: bold;
+            text-decoration: none;
+            transition: color 0.2s ease-in-out;
+        }
+        .go-back:hover {
+            color: #005f99;
+        }
+        footer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
