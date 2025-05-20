@@ -171,10 +171,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['pro
 }
 
 $page = isset($_GET['page']) ? $_GET['page'] : (isset($_SESSION['user']) ? 'products' : 'home');
-$message = $_SESSION['message'] ?? null;
-$form_error = $_SESSION['form_error'] ?? null;
-$form_data = $_SESSION['form_data'] ?? null;
-unset($_SESSION['message'], $_SESSION['form_error'], $_SESSION['form_data']);
 ?>
 
 <!DOCTYPE html>
@@ -518,8 +514,8 @@ unset($_SESSION['message'], $_SESSION['form_error'], $_SESSION['form_data']);
         <?php endforeach; ?>
         <p style="text-align:right; font-weight:bold; margin-top: 20px;">Всього: <?php echo $total; ?> грн</p>
         <div style="text-align: right; margin-top: 30px;">
-            <button onclick="location.href='lab3.php?page=products'" style="margin-left: 10px;">Повернутися назад</button>
-            <form method="post" action="lab3.php?page=cart" style="display: inline;">
+            <button onclick="location.href='lab4.php?page=products'" style="margin-left: 10px;">Повернутися назад</button>
+            <form method="post" action="lab4.php?page=cart" style="display: inline;">
                 <input type="hidden" name="action" value="checkout">
                 <button type="submit">Придбати</button>
             </form>
