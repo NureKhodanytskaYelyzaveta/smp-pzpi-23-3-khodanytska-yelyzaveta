@@ -1,1 +1,692 @@
+Міністерство освіти і науки України 
+Харківський національний університет радіоелектроніки
 
+
+Катедра програмної інженерії
+
+Звіт
+з лабораторної роботи №4
+з дисципліни «Скриптові мови програмування»
+
+
+
+Виконала:                                                                 Перевірив:
+ст. гр. ПЗПІ-23-3						викладач катедри ПІ
+Ходаницька Єлизавета 					Сокорчук Ігор Петрович
+
+
+
+
+
+
+
+Харків - 2025
+	1 ІСТОРІЯ ЗМІН
+№
+Дата
+Версія звіту
+Опис змін та виправлень
+1
+05.05.2025
+0.1
+Зроблено звіт
+2
+12.05.2025
+0.2
+Перероблено звіт згідно вимог
+
+
+	2 ЗАВДАННЯ
+	Навчитися масштабувати код програм, працювати з формами, здійснювати авторизацію та обмеження прав доступу.
+
+	3 ОПИС ВИКОНАНОЇ РОБОТИ
+	3.1 Скрипт і робота скрипта
+	Скрипт реалізує веб-додаток для онлайн-магазину з можливістю автентифікації користувачів, перегляду товарів, додавання їх до кошика, а також редагування профілю. На початку ініціалізується сесія, що дозволяє зберігати дані користувача та його кошика між запитами. У випадку запиту на вихід користувача сесія завершується, після чого відбувається редирект на головну сторінку(див. рис. Б.1).
+У додатку є масив користувачів з логінами й паролями, захищеними через хешування, а також база даних SQLite, у якій створюється таблиця товарів, якщо вона ще не існує. До бази додаються наперед визначені продукти з унікальними ідентифікаторами, назвами й цінами, якщо їх ще немає у таблиці.
+Користувач може авторизуватися через форму входу (див. рис. Б.2). У разі успішної автентифікації в сесії зберігається ім’я користувача (див. рис. Б.3), після чого його перенаправляє на сторінку з товарами (див. рис. Б.4). Якщо логін або пароль неправильні, з'являється відповідне повідомлення про помилку.
+Залежно від значення параметра page, завантажується відповідна частина сайту: домашня сторінка, форма входу, перелік товарів, кошик (див. рис. Б.5) або профіль користувача (див. рис. Б.6 - Б.7). Перелік товарів відображається у вигляді таблиці з можливістю додати товар до кошика, вказавши кількість (від 1 до 100). Якщо товар уже є в кошику, його кількість оновлюється. У кошику користувач може переглядати додані товари та їх кількість, видаляти будь-який товар, а також бачити загальну суму покупки.
+Крім цього реалізовано сторінку профілю, де користувач може редагувати особисті дані: ім’я, прізвище, дату народження, коротку біографію (не менше 50 символів), а також завантажити або видалити фотографію. Під час оновлення профілю виконується валідація даних, зокрема перевіряється вік (не менше 16 років) та коректність формату фото.
+Усі дії користувача (додавання або видалення товару з кошика, оновлення профілю, завантаження фото) супроводжуються повідомленнями про успішне виконання або помилки.
+
+	4 ВИСНОВКИ
+	Під час виконання лабораторної роботи навчилися масштабувати код програм, працювати з формами, здійснювати авторизацію та обмеження прав доступу.
+
+	ДОДАТОК А 
+Відеозапис
+Відеозапис презентації результатів лабораторної роботи: https://youtu.be/P5GIDsURHQY
+
+Хронологічний опис відеозапису:
+00:13 — Пояснення php частини з сесією й обробкою дій
+00:47 — Пояснення створення бд
+04:48 — Пояснення HTML частини
+05:08 — Пояснення шапки сайту
+05:29 — Пояснення головної сторінки
+05:56 — Пояснення логіну
+06:17 — Пояснення сторінки продуктів з додаванням до кошику
+06:05 — Пояснення сторінки кошику з видаленням з кошику
+06:55 — Пояснення профілю
+07:41 — Пояснення підвалу сайту
+07:55 — Демонстрація роботи програми
+
+ДОДАТОК Б 
+Графічні матеріали
+
+Рисунок Б.1 — Головна сторінка до входу
+
+Рисунок Б.2 — Вхід
+
+
+Рисунок Б.3 — Головна сторінка після входу
+
+Рисунок Б.4 — Товари
+
+
+Рисунок Б.5 — Кошик
+
+Рисунок Б.6 — Профіль
+
+
+Рисунок Б.7 — Помилка при незаповненні
+
+ДОДАТОК В 
+Програмний код
+В1 Код «Продовольчий магазин "Весна"».
+
+GitHub репозиторій:
+https://github.com/NureKhodanytskaYelyzaveta/smp-pzpi-23-3-khodanytska-yelyzaveta/tree/main/Lab4/smp-pzpi-23-3-khodanytska-yelyzaveta-lab4
+
+1 <?php
+2 session_start();
+3 
+4 if (isset($_GET['action']) && $_GET['action'] === 'logout') {  
+5     session_unset();
+6     session_destroy();
+7     header("Location: lab4.php?page=home");
+8     exit;
+9 }
+10 
+11 $users = [
+12     'admin' => password_hash('password123', PASSWORD_DEFAULT),
+13     'user' => password_hash('userpass', PASSWORD_DEFAULT)     
+14 ];
+15 
+16 $db = new SQLite3('products.db');
+17 
+18 $db->exec("CREATE TABLE IF NOT EXISTS products (
+19     id INTEGER PRIMARY KEY,
+20     name TEXT NOT NULL,
+21     price INTEGER NOT NULL
+22 )");
+23 
+24 $products = [
+25     1 => ['name' => 'РњРѕР»РѕРєРѕ РїР°СЃС‚РµСЂРёР·РѕРІР°РЅРµ', 'price' => 12],
+26     2 => ['name' => 'РҐР»С–Р± С‡РѕСЂРЅРёР№', 'price' => 9],
+27     3 => ['name' => 'РЎРёСЂ Р±С–Р»РёР№', 'price' => 21],
+28     4 => ['name' => 'РЎРјРµС‚Р°РЅР° 20%', 'price' => 25],
+29     5 => ['name' => 'РљРµС„С–СЂ 1%', 'price' => 19],
+30     6 => ['name' => 'Р’РѕРґР° РіР°Р·РѕРІР°РЅР°', 'price' => 18],
+31     7 => ['name' => 'РџРµС‡РёРІРѕ "Р’РµСЃРЅР°"', 'price' => 14],
+32 ];
+33
+34 foreach ($products as $id => $product) {
+35     $stmt = $db->prepare("SELECT COUNT(*) as count FROM products WHERE id = :id");
+36     $stmt->bindValue(':id', $id, SQLITE3_INTEGER);
+37     $result = $stmt->execute();
+38     $row = $result->fetchArray(SQLITE3_ASSOC);
+39
+40     if ($row['count'] == 0) {
+41         $insert = $db->prepare("INSERT INTO products (id, name, price) VALUES (:id, :name, :price)");
+42         $insert->bindValue(':id', $id, SQLITE3_INTEGER);
+43         $insert->bindValue(':name', $product['name'], SQLITE3_TEXT);
+44         $insert->bindValue(':price', $product['price'], SQLITE3_INTEGER);
+45         $insert->execute();
+46     }
+47 }
+48
+49 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'login') {
+50     $username = trim($_POST['username'] ?? '');
+51     $password = $_POST['password'] ?? '';
+52
+53     if (empty($username) || empty($password)) {
+54         $message = "РЈСЃС– РїРѕР»СЏ РѕР±РѕРІ'СЏР·РєРѕРІС–!";
+55     } elseif (isset($users[$username]) && password_verify($password, $users[$username])) {
+56         $_SESSION['user'] = $username;
+57         header("Location: lab4.php?page=products");
+58         exit;
+59     } else {
+60         $message = "РќРµРїСЂР°РІРёР»СЊРЅРµ С–Рј'СЏ РєРѕСЂРёСЃС‚СѓРІР°С‡Р° Р°Р±Рѕ РїР°СЂРѕР»СЊ!";
+61     }
+62 }
+63
+64 $profile_data = file_exists('profile.php') ? include 'profile.php' : [];
+65
+66 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_photo']) && !empty($profile_data['photo']) && file_exists($profile_data['photo'])) {       
+67     unlink($profile_data['photo']);
+68     $profile_data['photo'] = null;
+69     file_put_contents('profile.php', '<?php return ' . var_export($profile_data, true) . ';');
+70     $message = "Р¤РѕС‚Рѕ РІРёРґР°Р»РµРЅРѕ!";
+71 }
+72
+73 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_profile' && isset($_SESSION['user'])) {
+74     $first_name = trim($_POST['first_name'] ?? '');
+75     $last_name = trim($_POST['last_name'] ?? '');
+76     $birth_date = trim($_POST['birth_date'] ?? '');
+77     $bio = trim($_POST['bio'] ?? '');
+78
+79     $errors = [];
+80
+81     if (empty($first_name) || empty($last_name) || empty($birth_date) || empty($bio)) {
+82         $errors[] = "РЈСЃС– РїРѕР»СЏ РѕР±РѕРІ'СЏР·РєРѕРІС–!";
+83     }
+84     if (strlen($first_name) <= 1) {
+85         $errors[] = "Р†Рј'СЏ РјР°С” Р±СѓС‚Рё РґРѕРІС€РёРј Р·Р° 1 СЃРёРјРІРѕР»!";
+86     }
+87     if (strlen($last_name) <= 1) {
+88         $errors[] = "РџСЂС–Р·РІРёС‰Рµ РјР°С” Р±СѓС‚Рё РґРѕРІС€РёРј Р·Р° 1 СЃРёРјРІРѕР»!";
+89     }
+90     if (strlen($bio) < 50) {
+91         $errors[] = "РЎС‚РёСЃР»Р° С–РЅС„РѕСЂРјР°С†С–СЏ РјР°С” РјС–СЃС‚РёС‚Рё С‰РѕРЅР°Р№РјРµРЅС€Рµ 50 СЃРёРјРІРѕР»С–РІ!";
+92     }
+93
+94     $birth = DateTime::createFromFormat('Y-m-d', $birth_date);
+95     if (!$birth || $birth > new DateTime('now -16 years')) {
+96         $errors[] = "РљРѕСЂРёСЃС‚СѓРІР°С‡Сѓ РјР°С” Р±СѓС‚Рё С‰РѕРЅР°Р№РјРµРЅС€Рµ 16 СЂРѕРєС–РІ!";
+97     }
+98
+99     $photo_path = $profile_data['photo'] ?? null;
+100     if (isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
+101         $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
+102         $max_size = 2 * 1024 * 1024;
+103
+104         if (!in_array($_FILES['photo']['type'], $allowed_types)) {
+105             $errors[] = "Р”РѕР·РІРѕР»РµРЅС– С„РѕСЂРјР°С‚Рё: JPEG, PNG, GIF!";
+106         } elseif ($_FILES['photo']['size'] > $max_size) {
+107             $errors[] = "Р РѕР·РјС–СЂ С„Р°Р№Р»Сѓ РЅРµ РјР°С” РїРµСЂРµРІРёС‰СѓРІР°С‚Рё 2 РњР‘!";
+108         } else {
+109             $upload_dir = 'uploads/';
+110             if (!is_dir($upload_dir)) {
+111                 mkdir($upload_dir, 0755, true);
+112             }
+113             $photo_path = $upload_dir . uniqid('profile_') . '_' . basename($_FILES['photo']['name']);
+114             if (!move_uploaded_file($_FILES['photo']['tmp_name'], $photo_path)) {
+115                 $errors[] = "РќРµ РІРґР°Р»РѕСЃСЏ Р·Р±РµСЂРµРіС‚Рё С„Р°Р№Р»!";
+116             } else {
+117                 if (!empty($profile_data['photo']) && file_exists($profile_data['photo'])) {
+118                     unlink($profile_data['photo']);
+119                 }
+120             }
+121         }
+122     } elseif ($_FILES['photo']['error'] !== UPLOAD_ERR_NO_FILE) {
+123         $errors[] = "РџРѕРјРёР»РєР° Р·Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏ С„Р°Р№Р»Сѓ!";
+124     }
+125
+126     if (empty($errors)) {
+127         $profile_data = [
+128             'first_name' => $first_name,
+129             'last_name' => $last_name,
+130             'birth_date' => $birth_date,
+131             'bio' => $bio,
+132             'photo' => $photo_path
+133         ];
+134
+135         file_put_contents('profile.php', '<?php return ' . var_export($profile_data, true) . ';');
+136         $message = "РџСЂРѕС„С–Р»СЊ СѓСЃРїС–С€РЅРѕ РѕРЅРѕРІР»РµРЅРѕ!";
+137     } else {
+138         $message = implode('<br>', $errors);
+139     }
+140 }
+141 
+142 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && isset($_SESSION['user'])) {
+143     $action = $_POST['action'];
+144
+145     if (!isset($_SESSION['cart'])) {
+146         $_SESSION['cart'] = [];
+147     }
+148
+149     if (isset($_POST['product_id'])) {
+150         $id = (int)$_POST['product_id'];
+151
+152         if ($action === 'add') {
+153             $quantity = max(1, min(100, (int)$_POST['quantity']));
+154             if (isset($_SESSION['cart'][$id])) {
+155                 $_SESSION['cart'][$id] = min($_SESSION['cart'][$id] + $quantity, 100);
+156             } else {
+157                 $_SESSION['cart'][$id] = $quantity;
+158             }
+159             $_SESSION['message'] = "РўРѕРІР°СЂ РґРѕРґР°РЅРѕ РґРѕ РєРѕС€РёРєР°!";
+160         }
+161
+162         if ($action === 'remove' && isset($_SESSION['cart'][$id])) {
+163             unset($_SESSION['cart'][$id]);
+164             $_SESSION['message'] = "РўРѕРІР°СЂ РІРёРґР°Р»РµРЅРѕ Р· РєРѕС€РёРєР°!";
+165         }
+166     }
+167
+168     if ($action === 'checkout') {
+169         $_SESSION['cart'] = [];
+170         $_SESSION['message'] = "Р”СЏРєСѓС”РјРѕ Р·Р° РїРѕРєСѓРїРєСѓ!";
+171         header("Location: lab4.php?page=cart");
+172         exit;
+173     }
+174 }
+175 
+176 $page = isset($_GET['page']) ? $_GET['page'] : (isset($_SESSION['user']) ? 'products' : 'home');
+177 $message = $_SESSION['message'] ?? null;
+178 $form_error = $_SESSION['form_error'] ?? null;
+179 $form_data = $_SESSION['form_data'] ?? null;
+180 unset($_SESSION['message'], $_SESSION['form_error'], $_SESSION['form_data']);
+181 ?>
+182
+183 <!DOCTYPE html>
+184 <html lang="uk">
+185 <head>
+186     <meta charset="UTF-8">
+187     <title>РџСЂРѕРґРѕРІРѕР»СЊС‡РёР№ РјР°РіР°Р·РёРЅ "Р’РµСЃРЅР°"</title>
+188     <style>
+189 * {
+190     box-sizing: border-box;
+191     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;    
+192 }
+193 html, body {
+194     height: 100vh;
+195     margin: 0;
+196     background: #f2f4f8;
+197     color: #333;
+198     position: relative;
+199 }
+200 header, footer {
+201     background-color: #005f99;
+202     color: white;
+203     height: 60px;
+204     padding: 15px 30px;
+205     display: flex;
+206     justify-content: center;
+207     align-items: center;
+208 }
+209 .wrapper {
+210     min-height: 100vh;
+211     padding-bottom: 60px;
+212 }
+213 nav a {
+214     color: white;
+215     margin: 0 15px;
+216     text-decoration: none;
+217     font-weight: bold;
+218 }
+219 main {
+220     padding: 30px;
+221     max-width: 900px;
+222     margin: 0 auto;
+223     background-color: white;
+224     border-radius: 12px;
+225     box-shadow: 0 0 15px rgba(0,0,0,0.05);
+226     padding-top: 20px;
+227     padding-bottom: 80px;
+228 }
+229 h2 {
+230     margin-bottom: 30px;
+231     color: #005f99;
+232     border-bottom: 2px solid #005f99;
+233     padding-bottom: 10px;
+234 }
+235 .product {
+236     display: flex;
+237     align-items: center;
+238     justify-content: space-between;
+239     padding: 15px 10px;
+240     border-bottom: 1px solid #eee;
+241 }
+242 .product h3 {
+243     margin: 0;
+244     flex: 1;
+245 }
+246 .product p {
+247     margin: 0 20px;
+248     color: #555;
+249 }
+250 .product form {
+251     display: flex;
+252     align-items: center;
+253     gap: 10px;
+254 }
+255 input[type="number"] {
+256     width: 60px;
+257     padding: 5px;
+258     border-radius: 4px;
+259     border: 1px solid #ccc;
+260 }
+261 button {
+262     background-color: #005f99;
+263     color: white;
+264     border: none;
+265     padding: 8px 16px;
+266     border-radius: 6px;
+267     cursor: pointer;
+268     transition: background-color 0.2s ease-in-out;
+269 }
+270 button:hover {
+271     background-color: #004d80;
+272 }
+273 .message {
+274     text-align: center;
+275     font-weight: bold;
+276     margin-bottom: 20px;
+277 }
+278 .go-back {
+279     color: black;
+280     font-weight: bold;
+281     text-decoration: none;
+282     transition: color 0.2s ease-in-out;
+283 }
+284 .go-back:hover {
+285     color: #005f99;
+286 }
+287 .login-form, .profile-form {
+288     display: flex;
+289     flex-direction: column;
+290     gap: 20px;
+291     max-width: 400px;
+292     width: 100%;
+293     margin: auto;
+294     padding: 30px;
+295     background-color: #ffffff;
+296     border-radius: 12px;
+297     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+298     border: 1px solid #e0e0e0;
+299 }
+300 .login-form label {
+301     font-size: 16px;
+302     color: #34495e;
+303     font-weight: 500;
+304 }
+305 .login-form input {
+306     width: 100%;
+307     padding: 12px;
+308     font-size: 16px;
+309     border: 1px solid #dcdcdc;
+310     border-radius: 8px;
+311     outline: none;
+312     transition: border-color 0.3s ease, box-shadow 0.3s ease;
+313 }
+314 .login-form input:focus, .profile-form input:focus {
+315     border-color: #3498db;
+316     box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+317 }
+318 .login-form button, .profile-form button {
+319     padding: 12px;
+320     font-size: 16px;
+321     font-weight: 600;
+322     color: #ffffff;
+323     background-color: #3498db;
+324     border: none;
+325     border-radius: 8px;
+326     cursor: pointer;
+327     transition: background-color 0.3s ease, transform 0.1s ease;
+328 }
+329 .login-form button:hover, .profile-form button:hover {
+330     background-color: #2980b9;
+331     transform: translateY(-2px);
+332 }
+333 .login-form button:active, .profile-form button:active {
+334     transform: translateY(0);
+335 }
+336 .profile-container {
+337     display: flex;
+338     gap: 20px;
+339     align-items: flex-start;
+340 }
+341 .profile-photo-wrapper {
+342     display: flex;
+343     flex-direction: column;
+344     gap: 10px;
+345     min-width: 160px;
+346     align-items: center;
+347 }
+348 .profile-photo {
+349     width: 120px;
+350     height: 120px;
+351     border: 3px solid #005f99;
+352     background: #f9f9f9;
+353     overflow: hidden;
+354     border-radius: 10%;
+355     display: flex;
+356     align-items: center;
+357     justify-content: center;
+358     position: relative;
+359     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+360 }
+361 .profile-photo img {
+362     width: 100%;
+363     height: 100%;
+364     object-fit: cover;
+365 }
+366 .username {
+367     font-weight: bold;
+368     color: #005f99;
+369     margin-top: 10px;
+370     text-align: center;
+371 }
+372 .profile-info {
+373     flex: 1;
+374     display: flex;
+375     flex-direction: column;
+376     gap: 15px;
+377 }
+378 .profile-info .row {
+379     display: flex;
+380     gap: 15px;
+381 }
+382 .profile-info input[type="text"],
+383 .profile-info input[type="date"] {
+384     flex: 1;
+385     padding: 10px;
+386     border: 1px solid #ccc;
+387     border-radius: 8px;
+388     box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+389     transition: border-color 0.2s ease-in-out;
+390 }
+391 .profile-info input[type="text"]:focus,
+392 .profile-info input[type="date"]:focus {
+393     border-color: #005f99;
+394     outline: none;
+395 }
+396 .profile-info textarea {
+397     resize: vertical;
+398     min-height: 120px;
+399     width: 100%;
+400     flex: 1;
+401     padding: 10px;
+402     border: 1px solid #ccc;
+403     border-radius: 8px;
+404     box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+405     transition: border-color 0.2s ease-in-out;
+406 }
+407 .profile-info textarea:focus {
+408     border-color: #005f99;
+409     outline: none;
+410 }
+411 .profile-buttons {
+412     display: flex;
+413     gap: 10px;
+414     margin-top: 10px;
+415     justify-content: center;
+416 }
+417 .save-button-wrapper {
+418     margin-top: 15px;
+419     display: flex;
+420     justify-content: flex-end;
+421 }
+422 .save-button-wrapper button {
+423     padding: 10px 20px;
+424     border-radius: 8px;
+425     font-weight: bold;
+426 }
+427 footer {
+428     position: absolute;
+429     bottom: 0;
+430     width: 100%;
+431 }
+432     </style>
+433 </head>
+434 <body>
+435
+436 <header>
+437     <nav>
+438         <a href="lab4.php?page=home">Р“РѕР»РѕРІРЅР°</a> | 
+439         <?php if (isset($_SESSION['user'])): ?>
+440             <a href="lab4.php?page=products">РўРѕРІР°СЂРё</a> |
+441             <a href="lab4.php?page=cart">РљРѕС€РёРє</a> |
+442             <a href="lab4.php?page=profile">РџСЂРѕС„С–Р»СЊ</a> |
+443             <a href="lab4.php?action=logout">Р’РёР№С‚Рё (<?php echo htmlspecialchars($_SESSION['user']); ?>)</a>
+444         <?php else: ?>
+445             <a href="lab4.php?page=login">РЈРІС–Р№С‚Рё</a>
+446         <?php endif; ?>
+447     </nav>
+448 </header>
+449 
+450 <main>
+451
+452 <?php if (!empty($message)): ?>
+453     <p class="message" style="color:green;"><?php echo htmlspecialchars($message); ?></p>
+454 <?php endif; ?>
+455
+456 <?php if (!empty($form_error)): ?>
+457     <p class="message" style="color:red;"><?php echo htmlspecialchars($form_error); ?></p>
+458 <?php endif; ?>
+459
+460 <?php if ($page === 'home'): ?>
+461     <?php if (isset($_SESSION['user'])): ?>
+462         <h2>Р›Р°СЃРєР°РІРѕ РїСЂРѕСЃРёРјРѕ, <?php echo htmlspecialchars($_SESSION['user']); ?>!</h2>
+463         <p>Р Р°РґС– Р·РЅРѕРІСѓ РІР°СЃ Р±Р°С‡РёС‚Рё РЅР° РЅР°С€РѕРјСѓ СЃР°Р№С‚С–.</p>
+464     <?php else: ?>
+465         <h2>Р’С–С‚Р°С”РјРѕ!</h2>
+466         <p>Р”Р»СЏ РїРµСЂРµРіР»СЏРґСѓ РєРѕРЅС‚РµРЅС‚Сѓ СЃР°Р№С‚Сѓ, Р±СѓРґСЊ Р»Р°СЃРєР°, <a href="lab4.php?page=login" class="go-back">СѓРІС–Р№РґС–С‚СЊ</a>.</p>
+467     <?php endif; ?>
+468
+469 <?php elseif ($page === 'login' && !isset($_SESSION['user'])): ?>
+470     <h2>Р’С…С–Рґ</h2>
+471     <form method="post" action="lab4.php?page=login" class="login-form">
+472         <input type="hidden" name="action" value="login">
+473         <label>
+474             Р†Рј'СЏ РєРѕСЂРёСЃС‚СѓРІР°С‡Р°:
+475             <input type="text" name="username" required>
+476         </label>
+477         <label>
+478             РџР°СЂРѕР»СЊ:
+479             <input type="password" name="password" required>
+480         </label>
+481         <button type="submit">РЈРІС–Р№С‚Рё</button>
+482     </form>
+483
+484 <?php elseif ($page === 'products' && isset($_SESSION['user'])): ?>
+485     <h2>РўРѕРІР°СЂРё</h2>
+486     <?php foreach ($products as $id => $product): ?>
+487         <div class="product">
+488             <h3><?php echo htmlspecialchars($product['name']); ?></h3>
+489             <p>Р¦С–РЅР°: <?php echo $product['price']; ?> РіСЂРЅ</p>
+490             <form method="post" action="lab4.php?page=products">
+491                 <input type="hidden" name="product_id" value="<?php echo $id; ?>">
+492                 <input type="hidden" name="action" value="add">
+493                 РљС–Р»СЊРєС–СЃС‚СЊ: <input type="number" name="quantity" value="1" min="1" max="100">
+494                 <button type="submit">РљСѓРїРёС‚Рё</button>
+495             </form>
+496         </div>
+497     <?php endforeach; ?>
+498
+499 <?php elseif ($page === 'cart' && isset($_SESSION['user'])): ?>
+500     <h2>РљРѕС€РёРє</h2>
+501     <?php if (empty($_SESSION['cart'])): ?>
+502         <p>Р’Р°С€ РєРѕС€РёРє РїРѕСЂРѕР¶РЅС–Р№. <a href="lab4.php?page=products" class="go-back">РџРµСЂРµР№С‚Рё РґРѕ РїРѕРєСѓРїРѕРє</a></p>
+503     <?php else: ?>
+504         <?php
+505         $total = 0;
+506         foreach ($_SESSION['cart'] as $id => $quantity):
+507             if (!isset($products[$id])) continue;
+508             $product = $products[$id];
+509             $sum = $product['price'] * $quantity;
+510             $total += $sum;
+511         ?>
+512             <div class="product">
+513                 <h3><?php echo htmlspecialchars($product['name']); ?></h3>
+514                 <p>РљС–Р»СЊРєС–СЃС‚СЊ: <?php echo $quantity; ?> С€С‚. Р¦С–РЅР°: <?php echo $sum; ?> РіСЂРЅ</p>
+515                 <form method="post" action="lab4.php?page=cart">
+516                     <input type="hidden" name="product_id" value="<?php echo $id; ?>">
+517                     <input type="hidden" name="action" value="remove">
+518                     <button type="submit">Р’РёРґР°Р»РёС‚Рё</button>
+519                 </form>
+520             </div>
+521         <?php endforeach; ?>
+522         <p style="text-align:right; font-weight:bold; margin-top: 20px;">Р’СЃСЊРѕРіРѕ: <?php echo $total; ?> РіСЂРЅ</p>
+523         <div style="text-align: right; margin-top: 30px;">
+524             <button onclick="location.href='lab4.php?page=products'" style="margin-left: 10px;">РџРѕРІРµСЂРЅСѓС‚РёСЃСЏ РЅР°Р·Р°Рґ</button>
+525             <form method="post" action="lab4.php?page=cart" style="display: inline;">
+526                 <input type="hidden" name="action" value="checkout">
+527                 <button type="submit">РџСЂРёРґР±Р°С‚Рё</button>
+528             </form>
+529         </div>
+530     <?php endif; ?>
+531
+532 <?php elseif ($page === 'profile' && isset($_SESSION['user'])): ?>
+533     <h2>РџСЂРѕС„С–Р»СЊ</h2>
+534     <form method="post" action="lab4.php?page=profile" enctype="multipart/form-data">
+535     <input type="hidden" name="action" value="update_profile">
+536
+537     <div class="profile-container" style="display: flex; gap: 40px; align-items: flex-start; flex-wrap: wrap;">
+538
+539         <div class="profile-photo-wrapper" style="text-align: center;">
+540             <div class="profile-photo">
+541                 <img id="preview" src="<?php echo !empty($profile_data['photo']) ? htmlspecialchars($profile_data['photo']) : ''; ?>" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10%;;">
+542             </div>
+543
+544             <div class="profile-buttons" style="margin-top: 10px;">
+545                 <label>
+546                     <input type="file" name="photo" accept="image/*" style="display: none;" onchange="document.getElementById('preview').src = window.URL.createObjectURL(this.files[0])">
+547                     <button type="button" onclick="this.previousElementSibling.click()">Р—Р°РІР°РЅС‚Р°Р¶РёС‚Рё</button>
+548                 </label>
+549
+550                 <?php if (!empty($profile_data['photo']) && file_exists($profile_data['photo'])): ?>
+551                     <form method="post" style="display:inline;">
+552                         <input type="hidden" name="delete_photo" value="1">
+553                         <button type="submit" onclick="return confirm('Р’РёРґР°Р»РёС‚Рё С„РѕС‚Рѕ?')">Р’РёРґР°Р»РёС‚Рё С„РѕС‚Рѕ</button>
+554                     </form>
+555                 <?php endif; ?>
+556             </div>
+557         </div>
+558
+559         <div class="profile-info" style="flex: 1; min-width: 300px;">
+560             <div class="row" style="display: flex; flex-wrap: wrap; gap: 10px;">
+561                 <input type="text" name="first_name" value="<?php echo htmlspecialchars($profile_data['first_name'] ?? ''); ?>" placeholder="Р†Рј'СЏ" required style="flex: 1; min-width: 150px;">
+562                 <input type="text" name="last_name" value="<?php echo htmlspecialchars($profile_data['last_name'] ?? ''); ?>" placeholder="РџСЂС–Р·РІРёС‰Рµ" required style="flex: 1; min-width: 150px;">
+563                 <input type="date" name="birth_date" value="<?php echo htmlspecialchars($profile_data['birth_date'] ?? ''); ?>" required style="flex: 1; min-width: 150px;">
+564             </div>
+565             <textarea name="bio" placeholder="РЎС‚РёСЃР»Р° С–РЅС„РѕСЂРјР°С†С–СЏ" required style="width: 100%; margin-top: 10px;"><?php echo htmlspecialchars($profile_data['bio'] ?? ''); ?></textarea>
+566             <div class="save-button-wrapper" style="margin-top: 10px;">
+567                 <button type="submit">Р—Р±РµСЂРµРіС‚Рё РїСЂРѕС„С–Р»СЊ</button>
+568             </div>
+569         </div>
+570     </div>
+571 </form>
+572
+573 <?php else: ?>
+574     <h2>Р’С–С‚Р°С”РјРѕ!</h2>
+575     <p>Р”Р»СЏ РїРµСЂРµРіР»СЏРґСѓ РєРѕРЅС‚РµРЅС‚Сѓ СЃР°Р№С‚Сѓ, Р±СѓРґСЊ Р»Р°СЃРєР°, <a href="lab4.php?page=login" class="go-back">СѓРІС–Р№РґС–С‚СЊ</a>.</p>  
+576 <?php endif; ?>
+577
+578 </main>
+579
+580 <footer>
+581     <nav>
+582         <a href="lab4.php?page=home">Р“РѕР»РѕРІРЅР°</a> |
+583         <?php if (isset($_SESSION['user'])): ?>
+584             <a href="lab4.php?page=products">РўРѕРІР°СЂРё</a> |
+585             <a href="lab4.php?page=cart">РљРѕС€РёРє</a> |
+586             <a href="lab4.php?page=profile">РџСЂРѕС„С–Р»СЊ</a> |
+587             <a href="lab4.php?action=logout">Р’РёР№С‚Рё</a>
+588         <?php else: ?>
+589             <a href="lab4.php?page=login">РЈРІС–Р№С‚Рё</a>
+590         <?php endif; ?>
+591     </nav>
+592 </footer>
+593
+594 </body>
+595 </html>
